@@ -1,9 +1,5 @@
-"""
-This is a boilerplate pipeline 'model_training'
-generated using Kedro 1.0.0
-"""
+from kedro.pipeline import Node, Pipeline
 
-from kedro.pipeline import Node, Pipeline  # noqa
 from .nodes import train_final_model
 
 

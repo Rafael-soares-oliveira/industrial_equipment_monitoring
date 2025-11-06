@@ -9,12 +9,25 @@ from .utils.logging_config import setup_logger
 
 
 class LoggingHooks:
+    """
+    Configure personalized logger.
+    """
+
     def __init__(self):
         self.loggers = {}
         self.pipeline_logger = setup_logger("pipeline")
         self._current_run_id: str | None = None
 
     def _make_run_id(self, raw_run_id: Any) -> str:
+        """
+        Add Run ID to the log.
+
+        Args:
+            raw_run_id (Any): _description_
+
+        Returns:
+            str: _description_
+        """
         if raw_run_id:
             return str(raw_run_id)
         # fallback: timestamp + short uuid

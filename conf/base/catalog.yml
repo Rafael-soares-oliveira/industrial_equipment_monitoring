@@ -4,11 +4,11 @@ raw_data:
 
 cleaned_data:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/cleaned_data.parquet
+  filepath: data/03_primary/cleaned_data.parquet
 
 dataset_info:
   type: pickle.PickleDataset
-  filepath: data/02_intermediate/dataset_info.pkl
+  filepath: data/04_feature/dataset_info.pkl
 
 train_data:
   type: pandas.ParquetDataset
@@ -32,30 +32,26 @@ predictions:
 
 report_data:
   type: pickle.PickleDataset
-  filepath: data/07_model_output/report_data.pkl
+  filepath: data/08_reporting/report_data.pkl
 
 confusion_matrix_plot:
   type: pillow.ImageDataset
-  filepath: data/07_reporting/graphs/confusion_matrix.png
+  filepath: data/08_reporting/graphs/confusion_matrix.png
 
 threshold_analysis_plot:
   type: pillow.ImageDataset
-  filepath: data/07_reporting/graphs/threshold_analysis.png
+  filepath: data/08_reporting/graphs/threshold_analysis.png
 
 roc_curve_plot:
   type: pillow.ImageDataset
-  filepath: data/07_reporting/graphs/roc_curve.png
+  filepath: data/08_reporting/graphs/roc_curve.png
 
 precision_recall_curve_plot:
   type: pillow.ImageDataset
-  filepath: data/07_reporting/graphs/precision_recall_curve.png
+  filepath: data/08_reporting/graphs/precision_recall_curve.png
 
 feature_importance_plot:
   type: pillow.ImageDataset
-  filepath: data/07_reporting/graphs/feature_importance.png
-
-logo:
-  type: pillow.ImageDataset
-  filepath: data/08_reference/logo.png
+  filepath: data/08_reporting/graphs/feature_importance.png
 
 

@@ -1,44 +1,48 @@
 model:
-  split:
-    test_size: 0.2
+  split: # Data splitting parameters
+    test_size: 0.2 # Proportion of data to be used as test set
     random_state: 42
 
-  featured_data:
+  featured_data: # Parameters for feature engineered data
     target_column: faulty
     features_to_drop: [location, equipment]
 
-  model_training:
+  model_training: # Parameters and hyperparameter
     study_name: industrial_equipment_monitoring
-    n_trials: 100
-    cv_folds: 5
-    cv_shuffle: True
-    early_stopping_rounds: 20
-    min_delta: 0.01 # 1 %
-    num_boost_round: 200
-    early_stopping_boost: 20
-    min_delta_boost: 0.01
+    n_trials: 100 # Number of trials for hyperparameter optimization
+    direction: maximize # Direction to optimize the objective function
+    cv_folds: 5 # Number of cross-validation folds
+    cv_shuffle: True # Whether to shuffle data before splitting into folds
+    early_stopping_rounds: 20 # Early stopping for study
+    min_delta: 0.01 # 1 % - Improvement considered significant for Early Stopping
+    num_boost_round: 200 # Maximum number of boosting rounds
+    early_stopping_boost: 20 # Early stopping for each trial
+    min_delta_boost: 0.01 # 1% - Improvement considered significant for Early Stopping in each trial
 
+    # Hyperparameter search space, change minimum value when wants to use default value
+    # When add a new hyperparameter, remember to update get_xgb_params.py
     xgb_params:
-      objective: binary:logistic
-      eval_metric: auc
-      tree_method: hist
-      device: cuda
+      objective: binary:logistic # objective function
+      eval_metric: auc # metric to optimize
+      tree_method: hist # options: auto, exact, approx, hist
+      device: cuda # change to 'cpu' if no GPU available
       max_depth: [3, 10]
-      learning_rate: [0.01, 0.3]
-      learning_rate_log: False
+      learning_rate: [0.01, 1]
+      learning_rate_log: False # whether to sample learning_rate in log scale
+      n_estimators: [50, 500]
       subsample: [0.6, 1]
       colsample_bytree: [0.1, 1]
       gamma: [0, 5]
       min_child_weight: [1, 10]
       reg_alpha: [1e-8, 1]
-      reg_alpha_log: False
+      reg_alpha_log: False # whether to sample reg_alpha in log scale
       reg_lambda: [1e-8, 1]
-      reg_lambda_log: False
+      reg_lambda_log: False # whether to sample reg_lambda in log scale
 
   reporting:
     figsize: [10, 8]
-    cmap: "Blues"
-    target_class: 1
+    cmap: "Blues" # colormap for plots
+    target_class: 1 # class to monitor
     threshold_method: recall # f1, youden, precision_recall, recall
     importance_type: gain # weight, gain, cover, total_gain, total_cover
 

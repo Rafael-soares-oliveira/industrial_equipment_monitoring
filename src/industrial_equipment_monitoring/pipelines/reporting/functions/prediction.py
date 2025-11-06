@@ -1,4 +1,3 @@
-from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -19,10 +18,18 @@ logger = setup_logger("PredictionNode")
 
 
 def find_optimal_threshold(
-    y_true: np.ndarray, y_pred_proba: np.ndarray, method: str = "f1"
+    y_true: np.ndarray, y_pred_proba: np.ndarray, method: str = "recall"
 ) -> tuple[float, float]:
     """
-    Encontra o threshold ótimo baseado em diferentes métricas
+    Calculate the optimal threshold using the specified method.
+
+    Args:
+        y_true (np.ndarray): Test target
+        y_pred_proba (np.ndarray): Predicted data
+        method (str, optional): Method to calculate the optimal threshold. Defaults to "recall".
+
+    Returns:
+        tuple[float, float]: Best threshold and best score.
     """
     thresholds = np.linspace(0.1, 0.9, 100)
     best_threshold = 0.5
@@ -73,9 +80,17 @@ def find_optimal_threshold(
 
 def calculate_metrics_at_threshold(
     y_true: np.ndarray, y_pred_proba: np.ndarray, threshold: float
-) -> Mapping[str, float]:
+) -> dict[str, float]:
     """
-    Calcula todas as métricas para um threshold específico
+    Calculate metrics using threshold.
+
+    Args:
+        y_true (np.ndarray): Test target
+        y_pred_proba (np.ndarray): Predicted data
+        threshold (float): Threshold value
+
+    Returns:
+        dict[str, float]: Dictionary with the calculated metrics.
     """
     y_pred = (y_pred_proba >= threshold).astype(int)
 
@@ -93,7 +108,15 @@ def calculate_threshold_analysis_data(
     y_true: np.ndarray, y_pred_proba: np.ndarray, num_thresholds: int = 50
 ) -> dict[str, np.ndarray]:
     """
-    Calcula dados para o gráfico de análise de threshold
+    Generate thresholds data for the graphs.
+
+    Args:
+        y_true (np.ndarray): Target data
+        y_pred_proba (np.ndarray): Predicted data
+        num_thresholds (int, optional): Number of thresholds. Defaults to 50.
+
+    Returns:
+        dict[str, np.ndarray]: _description_
     """
     thresholds = np.linspace(0.1, 0.9, num_thresholds)
     f1_scores = []
@@ -119,7 +142,21 @@ def calculate_threshold_analysis_data(
 
 def feature_importance(
     trained_model: xgb.Booster, importance_type: str = "gain"
-) -> Mapping[str, float | list[float]]:
+) -> dict[str, float | list[float]]:
+    """
+    Calculated the importance of each feature.
+
+    Args:
+        trained_model (xgb.Booster): Trained model
+        importance_type (str, optional): Method to calculate. Defaults to "gain".
+
+    Raises:
+        KeyError: Method is not specified.
+        Exception: Unexpected error.
+
+    Returns:
+        dict[str, float | list[float]]: A dictionary with the importance of each feature.
+    """
     logger.info(f"Extraindo importância das features usando tipo: {importance_type}")
     try:
         importance_raw = trained_model.get_score(importance_type=importance_type)
@@ -141,12 +178,19 @@ def make_predictions(
     trained_model: xgb.Booster, test_data: pd.DataFrame, params: dict[str, Any]
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """
-    Node do Kedro para fazer predições e calcular métricas para relatório
+    Obtain the prediction for threshold default and optimal threshold.
+
+    Args:
+        trained_model (xgb.Booster): Trained Model
+        test_data (pd.DataFrame): Test data
+        params (dict[str, Any]): Parameters from parameters.yml
+
+    Raises:
+        ValueError: Target column do not exist
+        Exception: _Unexpected error
 
     Returns:
-        Tuple com:
-        - DataFrame com predições (apenas colunas necessárias)
-        - Dict com todas as métricas e dados para gráficos
+        tuple[pd.DataFrame, dict[str, Any]]: Dictionary with the predictions
     """
     logger.info("Iniciando geração de predições e cálculo de métricas")
 
@@ -166,19 +210,19 @@ def make_predictions(
     logger.info(f"Dados de teste com target disponível. Shape: {X_test.shape}")
     logger.info(f"Distribuição do target: {y_true.value_counts().to_dict()}")
 
-    # Criar DMatrix para predição
+    # Convert to DMatrix
     try:
         dtest = xgb.DMatrix(X_test, feature_names=X_test.columns.tolist())
 
-        # Fazer predições
+        # make predictions
         y_pred_proba = trained_model.predict(dtest)
 
-        # Encontrar threshold ótimo
+        # Find optimal threshold
         optimal_threshold, optimal_score = find_optimal_threshold(
             y_true.values, y_pred_proba, method=threshold_method
         )
 
-        # Calcular métricas nos thresholds
+        # Calculate threshold metrics
         optimal_metrics = calculate_metrics_at_threshold(
             y_true.values, y_pred_proba, optimal_threshold
         )
@@ -186,10 +230,10 @@ def make_predictions(
             y_true.values, y_pred_proba, 0.5
         )
 
-        # Calcular dados para gráficos
+        # Calculate data for the graphs
         threshold_data = calculate_threshold_analysis_data(y_true.values, y_pred_proba)
 
-        # Calcular dados para curva ROC
+        # Calcualte data for the ROC Curve
         fpr, tpr, _ = roc_curve(y_true.values, y_pred_proba)
         precision_curve, recall_curve, _ = precision_recall_curve(
             y_true.values, y_pred_proba
@@ -202,7 +246,6 @@ def make_predictions(
         logger.error(f"Erro ao fazer predições: {e}")
         raise e
 
-    # Criar DataFrame apenas com predições (sem features originais)
     results_df = pd.DataFrame(
         {
             "prediction_probability": y_pred_proba,

@@ -1,16 +1,12 @@
-# TODO: registrar docstring
-"""_summary_"""
-
-
 def get_xgb_params(params: dict) -> dict:
-    # TODO: registrar docstring
-    """_summary_
+    """
+    Extract from parameters.yml the parameters and hyperparameters for the model
 
     Args:
-        params (dict): _description_
+        params (dict): From parameters.yml
 
     Returns:
-        dict: _description_
+        dict: Dictionary with the parameters
     """
     target_col: str = params["featured_data"]["target_column"]
     model_training: dict = params["model_training"]
@@ -19,6 +15,7 @@ def get_xgb_params(params: dict) -> dict:
     study_name: str = model_training["study_name"]
     optuna_params: dict = model_training["xgb_params"]
     n_trials: int = model_training["n_trials"]
+    direction: str = model_training["direction"]
 
     # Cross-Validation
     cv_folds: int = model_training["cv_folds"]
@@ -36,6 +33,7 @@ def get_xgb_params(params: dict) -> dict:
     eval_metric: str = optuna_params["eval_metric"]
     tree_method: str = optuna_params["tree_method"]
     device: str = optuna_params["device"]
+    n_estimators: list[int] = optuna_params["n_estimators"]
     max_depth: list[int] = optuna_params["max_depth"]
     learning_rate: list[float] = optuna_params["learning_rate"]
     learning_rate_log: bool = optuna_params["learning_rate_log"]
@@ -51,6 +49,7 @@ def get_xgb_params(params: dict) -> dict:
     return {
         "study_name": study_name,
         "n_trials": n_trials,
+        "direction": direction,
         "target_col": target_col,
         "cv_folds": cv_folds,
         "cv_shuffle": cv_shuffle,
@@ -63,6 +62,7 @@ def get_xgb_params(params: dict) -> dict:
         "eval_metric": eval_metric,
         "tree_method": tree_method,
         "device": device,
+        "n_estimators": n_estimators,
         "max_depth": max_depth,
         "learning_rate": learning_rate,
         "learning_rate_log": learning_rate_log,

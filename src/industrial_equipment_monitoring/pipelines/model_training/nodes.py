@@ -14,15 +14,18 @@ logger = setup_logger("ModelTraining")
 def train_final_model(
     train_data: pd.DataFrame, params: dict
 ) -> tuple[xgb.Booster, dict[str, str | int | float]]:
-    # TODO: registrar docstring
-    """_summary_
+    """
+    Train Model using XGBoost Native API
 
     Args:
-        featured_data (pd.DataFrame): _description_
-        params (dict): _description_
+        train_data (pd.DataFrame): Train data
+        params (dict): Parameters from parameters.yml
+
+    Raises:
+        ValueError: Raise error when DataFrame is empty.
 
     Returns:
-        tuple[xgb.Booster, dict[str, str | int | float]]: _description_
+        tuple[xgb.Booster, dict[str, str | int | float]]: Returns trained model and best_params that are save in catalog.yml
     """
     logger.info("Treinando modelo final com os melhores hiperparâmetros")
 
@@ -47,10 +50,12 @@ def train_final_model(
         }
     )
 
+    # Convert to DMatrix to use with XGBoost Native API
     dtrain: xgb.DMatrix = xgb.DMatrix(
         X_train, label=y_train, feature_names=X_train.columns.tolist()
     )
 
+    # XGBoost Native API
     booster: xgb.Booster = xgb.train(
         best_params,
         dtrain,

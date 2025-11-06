@@ -1,8 +1,3 @@
-"""
-This is a boilerplate pipeline 'data_processing'
-generated using Kedro 1.0.0
-"""
-
 from kedro.pipeline import Node, Pipeline
 
 from .nodes import load_clean_data, split_data

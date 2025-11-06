@@ -5,15 +5,15 @@ from pathlib import Path
 
 def get_git_root(path=None):
     """
-    Retorna o diretório raiz do repositório Git.
+    Returns the root git directory.
 
     Args:
-        path (str, optional): Caminho para verificar. Se None, usa o diretório atual.
+        path (str, optional): Path to check. If None, use the actual directory.
 
     Returns:
-        Path: Objeto Path do diretório raiz do Git
+        Path: Path of the root directory.
     Raises:
-        RuntimeError: Se não estiver em um repositório Git
+        RuntimeError: If it's not in a Git repository.
     """
     if path is None:
         path = os.getcwd()

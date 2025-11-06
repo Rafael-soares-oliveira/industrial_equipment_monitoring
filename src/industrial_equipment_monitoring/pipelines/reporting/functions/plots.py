@@ -14,7 +14,7 @@ logger = setup_logger("Reporting_Plots")
 
 
 def setup_plot_style():
-    """Configura o estilo consistente para os gráficos"""
+    """Configure plot styles"""
     plt.style.use("default")
     plt.rcParams["figure.figsize"] = [10, 6]
     plt.rcParams["font.size"] = 10
@@ -24,7 +24,16 @@ def setup_plot_style():
 
 def create_threshold_analysis_plot(report_data: dict[str, Any]) -> Figure:
     """
-    Cria gráfico de análise de threshold com múltiplos subplots
+    Generate plot to analyze optimal threshold
+
+    Args:
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Raises:
+        Exception: When an unexpected error occurs.
+
+    Returns:
+        Figure: Plotted graph
     """
     logger.info("Gerando gráfico de análise da curva threshold")
     try:
@@ -57,7 +66,7 @@ def create_threshold_analysis_plot(report_data: dict[str, Any]) -> Figure:
         ax1.legend()
         ax1.grid(True, alpha=0.3)
 
-        # Subplot 2: Precision e Recall vs Threshold
+        # Subplot 2: Precision and Recall vs Threshold
         ax2.plot(
             threshold_data["thresholds"],
             threshold_data["precision_scores"],
@@ -79,7 +88,7 @@ def create_threshold_analysis_plot(report_data: dict[str, Any]) -> Figure:
         ax2.legend()
         ax2.grid(True, alpha=0.3)
 
-        # Subplot 3: Acurácia vs Threshold
+        # Subplot 3: Accuracy vs Threshold
         ax3.plot(
             threshold_data["thresholds"],
             threshold_data["accuracy_scores"],
@@ -94,7 +103,7 @@ def create_threshold_analysis_plot(report_data: dict[str, Any]) -> Figure:
         ax3.legend()
         ax3.grid(True, alpha=0.3)
 
-        # Subplot 4: Comparação de métricas
+        # Subplot 4: Compare metrics
         metrics_names = ["Acurácia", "Precision", "Recall", "F1-Score"]
         optimal_values = [
             optimal_metrics[m] for m in ["accuracy", "precision", "recall", "f1"]
@@ -137,7 +146,16 @@ def create_threshold_analysis_plot(report_data: dict[str, Any]) -> Figure:
 
 def create_roc_curve_plot(report_data: dict[str, Any]) -> Figure:
     """
-    Cria gráfico da curva ROC
+    Generate plot for ROC Curve.
+
+    Args:
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Raises:
+        Exception: When an unexpected error occurs
+
+    Returns:
+        Figure: Plotted graph
     """
     logger.info("Gerando gráfico de análise da curva ROC")
     try:
@@ -182,7 +200,16 @@ def create_roc_curve_plot(report_data: dict[str, Any]) -> Figure:
 
 def create_precision_recall_curve_plot(report_data: dict[str, Any]) -> Figure:
     """
-    Cria gráfico da curva Precision-Recall
+    Generate plot to analyze precision-recall curve.
+
+    Args:
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Raises:
+        Exception: When an unexpected error occurs
+
+    Returns:
+        Figure: _Ploted graph
     """
     logger.info("Gerando gráfico de análise da curva de precisão-recall")
     try:
@@ -227,7 +254,16 @@ def create_precision_recall_curve_plot(report_data: dict[str, Any]) -> Figure:
 
 def create_confusion_matrix_plot(report_data: dict[str, Any]) -> Figure:
     """
-    Cria gráfico com matriz de confusão comparativa
+    Generate plot to analyze confusion matrix to default threshold and optimal threshold.
+
+    Args:
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Raises:
+        Exception: When an unexpected error occurs
+
+    Returns:
+        Figure: _Ploted graph
     """
     logger.info("Gerando gráfico de análise da matriz de confusão")
     try:
@@ -239,15 +275,15 @@ def create_confusion_matrix_plot(report_data: dict[str, Any]) -> Figure:
         y_pred_proba = report_data["y_pred_proba"]
         optimal_threshold = report_data["optimal_threshold"]
 
-        # Matriz com threshold ótimo
+        # Matrix for optimal threshold
         y_pred_optimal = (y_pred_proba >= optimal_threshold).astype(int)
         cm_optimal = confusion_matrix(y_true, y_pred_optimal)
 
-        # Matriz com threshold default
+        # Matrix for threshold default
         y_pred_default = (y_pred_proba >= margin_prediction).astype(int)
         cm_default = confusion_matrix(y_true, y_pred_default)
 
-        # Plot matriz ótima
+        # Plot optimal matrix
         sns.heatmap(
             cm_optimal,
             annot=True,
@@ -263,7 +299,7 @@ def create_confusion_matrix_plot(report_data: dict[str, Any]) -> Figure:
         ax1.set_yticklabels(["Negativo", "Positivo"])
         ax1.set_title(f"Threshold Ótimo\n({optimal_threshold:.3f})", fontweight="bold")
 
-        # Plot matriz default
+        # Plot matrix default
         sns.heatmap(
             cm_default,
             annot=True,
@@ -287,13 +323,17 @@ def create_confusion_matrix_plot(report_data: dict[str, Any]) -> Figure:
 
 
 def create_feature_importance_plot(report_data: dict[str, Any]) -> Figure:
-    """_summary_
+    """
+    Generate plot to analyze feature importance.
 
     Args:
-        report_data (dict[str, Any]): _description_
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Raises:
+        Exception: When an unexpected error occurs
 
     Returns:
-        Figure: _description_
+        Figure: _Ploted graph
     """
     logger.info("Gerando gráfico de importância das features")
 
@@ -329,6 +369,15 @@ def create_feature_importance_plot(report_data: dict[str, Any]) -> Figure:
 
 
 def _fig_to_pil(fig: Figure) -> Image.Image:
+    """
+    Convert matplotlib.figure.Figure to PIL.Image.Image
+
+    Args:
+        fig (Figure): Image with the format matplotlib.figure.Figure
+
+    Returns:
+        Image.Image: Image with the format PIL.Image.Image
+    """
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
     buf.seek(0)
@@ -337,7 +386,16 @@ def _fig_to_pil(fig: Figure) -> Image.Image:
     return pil_image
 
 
-def model_plot(report_data: dict[str, Any]):
+def model_plot(report_data: dict[str, Any]) -> dict[str, Image.Image]:
+    """
+    Create a dictionary with the metrics plots
+
+    Args:
+        report_data (dict[str, Any]): Predictions and calculed threshold.
+
+    Returns:
+        dict[str, Image.Image]: Dictionary with the graphs of the model
+    """
     threshold = create_threshold_analysis_plot(report_data)
     threshold_pil = _fig_to_pil(threshold)
     confusion = create_confusion_matrix_plot(report_data)

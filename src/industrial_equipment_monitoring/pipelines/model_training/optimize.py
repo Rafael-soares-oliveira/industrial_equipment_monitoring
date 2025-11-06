@@ -22,13 +22,13 @@ def create_objective(
     y: pd.Series,
     xgb_params: dict[str, Any],
 ):
-    # TODO: registrar docstring
-    """_summary_
+    """
+    Function to optimize hyperparameters using Optuna.
 
     Args:
-        x (pd.DataFrame): _description_
-        y (pd.Series): _description_
-        xgb_params (dict): _description_
+        x (pd.DataFrame): Features data
+        y (pd.Series): Target data
+        xgb_params (dict): Parameters and hyperparameters
     """
 
     def objective(trial: Trial) -> float:
@@ -83,8 +83,7 @@ def create_objective(
         )
         scores: list[float] = []
 
-        logger.debug(f"X shape: {x.shape}, y shape: {y.shape}")
-
+        # Manual Cross-Validation
         for fold, (train_idx, val_idx) in enumerate(cv.split(x, y), 1):
             X_tr = x.iloc[train_idx]
             X_val = x.iloc[val_idx]
@@ -95,6 +94,7 @@ def create_objective(
                 dtrain = xgb.DMatrix(X_tr, label=y_tr, feature_names=x.columns.tolist())
                 dval = xgb.DMatrix(X_val, label=y_val, feature_names=x.columns.tolist())
 
+                # Stop trial when there is no improvement
                 early_stopping = EarlyStopping(
                     rounds=xgb_params["early_stopping_boost"],
                     metric_name=xgb_params["eval_metric"],
@@ -103,6 +103,7 @@ def create_objective(
                     save_best=True,
                 )
 
+                # Using Native XGBoost API with EarlyStopping
                 booster: Booster = xgb.train(
                     trial_params,
                     dtrain,
@@ -130,7 +131,7 @@ def create_objective(
         mean_score = float(np.mean(scores))
         std_score = float(np.std(scores))
 
-        logger.debug(
+        logger.info(
             f"Trial {trial.number} finalizado: AUC = {mean_score:.4f} ± {std_score:.4f}"
         )
 
@@ -139,25 +140,27 @@ def create_objective(
     return objective
 
 
-def setup_optuna_study(study_name: str) -> optuna.Study:
-    # TODO: registrar docstring
-    """_summary_
+def setup_optuna_study(study_name: str, direction: str) -> optuna.Study:
+    """
+    Setup Optuna Study.
 
     Args:
-        params (dict): _description_
+        study_name (str): Study name
+        direction (str): Direction to optimize the objective function
 
     Returns:
-        optuna.Study: _description_
+        optuna.Study: Study ready to optimize.
     """
     today: str = datetime.today().strftime("%Y%m%d")
-    base_name: str = f"{study_name}_{today}"
+    base_name: str = f"{study_name}_{today}"  # add datetime to the study name
     suffix: int = 0
 
+    # When the study name already exists, it will add a number suffix
     while True:
         unique_name: str = f"{base_name}" if suffix == 0 else f"{base_name}_{suffix}"
         try:
             study: optuna.Study = optuna.create_study(
-                direction="maximize",
+                direction=direction,
                 study_name=unique_name,
                 pruner=optuna.pruners.HyperbandPruner(),
                 sampler=optuna.samplers.TPESampler(seed=42),
@@ -172,15 +175,21 @@ def setup_optuna_study(study_name: str) -> optuna.Study:
 def optimized_hyperparameters(
     X_train: pd.DataFrame, y_train: pd.Series, xgb_params: dict
 ) -> dict[str, str | int | float]:
-    # TODO: register docstring
-    """_summary_
+    """
+    Initiate study to optimize hyperparameters.
 
     Args:
-        dataframe (pd.DataFrame): _description_
-        params (dict): _description_
+        X_train (pd.DataFrame): Features
+        y_train (pd.Series): Target
+        xgb_params (dict): Parameters and hyperparameters.
+
+    Raises:
+        ValueError: DataFrame is empty
+        Optuna.Error: When the study fails.
+        Exception: When an unexpected error occurs.
 
     Returns:
-        dict[str, str | int |float]: _description_
+        dict[str, str | int | float]: _description_
     """
     logger.info("Iniciando otimização de hiperparâmetros com Optuna")
     if X_train.empty:
@@ -192,18 +201,19 @@ def optimized_hyperparameters(
     objective_func = create_objective(X_train, y_train, xgb_params)
 
     # Config study for Optuna
-    study = setup_optuna_study(xgb_params["study_name"])
+    study = setup_optuna_study(xgb_params["study_name"], xgb_params["direction"])
 
     # Execute otimization
     logger.info(f"Executando {xgb_params['n_trials']} trials de otimização")
 
     best_score = None
-    no_improvement_count = 0
-    patience = xgb_params["early_stopping_rounds"]
-    min_delta = xgb_params["min_delta"]
+    no_improvement_count = 0  # Count when the training has no improvement
+    patience = xgb_params["early_stopping_rounds"]  # How many trials until stops.
+    min_delta = xgb_params["min_delta"]  # % to consider as 'no improvement'.
 
+    # Function to stop training when has no improvement
     def callback_early_stopping(study, trial):
-        nonlocal best_score, no_improvement_count
+        nonlocal best_score, no_improvement_count  # Get variable outside function
 
         if best_score is None:
             best_score = study.best_value
@@ -224,16 +234,17 @@ def optimized_hyperparameters(
             study.stop()
 
     try:
+        # Start study
         study.optimize(
             objective_func,
             n_trials=xgb_params["n_trials"],
-            callbacks=[callback_early_stopping],
+            callbacks=[callback_early_stopping],  # How many trials until stop
             show_progress_bar=True,
         )
-    except OptunaError as e:
+    except OptunaError as e:  # Study fails
         logger.error(f"Estudo falhou: {e}")
         raise e
-    except Exception as e:
+    except Exception as e:  # Unexpected error
         logger.error(f"Erro inesperado: {e}")
         raise e
 

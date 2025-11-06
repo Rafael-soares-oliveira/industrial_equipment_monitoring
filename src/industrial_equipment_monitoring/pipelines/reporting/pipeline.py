@@ -4,7 +4,7 @@ generated using Kedro 1.0.0
 """
 
 from kedro.pipeline import Node, Pipeline  # noqa
-from .nodes import generate_report_data, generate_plots, generate_report
+from .nodes import generate_report_data, generate_plots
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -28,10 +28,9 @@ def create_pipeline(**kwargs) -> Pipeline:
                 ],
                 name="plots",
             ),
-            # Nó intermediário para agrupar todos os inputs em um dicionário
+            # Intemediate node to group all the inputs in a dictionary. Used to generate report
             Node(
-                func=lambda logo,
-                dataset_info,
+                func=lambda dataset_info,
                 best_params,
                 report_data,
                 confusion_matrix_plot,
@@ -40,7 +39,6 @@ def create_pipeline(**kwargs) -> Pipeline:
                 roc_curve_plot,
                 feature_importance_plot,
                 params: {
-                    "logo": logo,
                     "dataset_info": dataset_info,
                     "best_params": best_params,
                     "report_data": report_data,
@@ -52,7 +50,6 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "params": params,
                 },
                 inputs=[
-                    "logo",
                     "dataset_info",
                     "best_params",
                     "report_data",
@@ -65,13 +62,6 @@ def create_pipeline(**kwargs) -> Pipeline:
                 ],
                 outputs="report_inputs_dict",
                 name="prepare_report_inputs",
-            ),
-            # Nó principal do relatório
-            Node(
-                func=generate_report,
-                inputs=["report_inputs_dict"],
-                outputs="temp",
-                name="report",
             ),
         ]
     )

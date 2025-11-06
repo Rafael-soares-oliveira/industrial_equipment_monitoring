@@ -20,39 +20,42 @@ def setup_logger(name: str, log_dir: str = "logs") -> logging.Logger:
         ValueError: If name is empty or invalid
     """
     if not name or not isinstance(name, str):
-        raise ValueError("Logger name must be a non-empty string")
+        raise ValueError("Nome atribuído ao logger não deve estar vazio.")
 
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)  # Store every logger level
 
-    date_str = datetime.now(UTC).strftime("%Y%m%d")
-    log_filename = f"{date_str}.log"
+    date_str = datetime.now(UTC).strftime("%Y%m%d")  # 20250331 -> 2025/03/31
+    log_filename = f"{date_str}.log"  # Name of each log file.
     log_path = Path(log_dir) / log_filename
 
-    if not logger.handlers:
-        formatter = logging.Formatter(
-            "%(asctime)s - [%(levelname)s] %(name)s - %(message)s"
-        )
+    if logger.hasHandlers():
+        return logger
 
-        # Terminal
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setFormatter(formatter)
-        logger.addHandler(stream_handler)
+    # datetime - [LEVEL] Name - Starting pipeline
+    formatter = logging.Formatter(
+        "%(asctime)s - [%(levelname)s] %(name)s - %(message)s"
+    )
 
-        # Ensure that the log directory exists
-        Path(log_dir).mkdir(parents=True, exist_ok=True)
+    # Terminal logger
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
 
-        # Daily logs with automatic rotation
-        file_handler = TimedRotatingFileHandler(
-            filename=str(log_path),
-            when="midnight",
-            interval=1,
-            backupCount=30,
-            encoding="utf-8",
-            utc=True,
-        )
-        file_handler.setFormatter(formatter)
-        file_handler.suffix = "%Y%m%d.log"
-        logger.addHandler(file_handler)
+    # Ensure that the log directory exists
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+
+    # Daily logs with automatic rotation
+    file_handler = TimedRotatingFileHandler(
+        filename=str(log_path),
+        when="MIDNIGHT",
+        interval=1,
+        backupCount=30,
+        encoding="utf-8",
+        utc=True,
+    )
+    file_handler.setFormatter(formatter)
+    file_handler.suffix = "%Y%m%d.log"
+    logger.addHandler(file_handler)
 
     return logger
