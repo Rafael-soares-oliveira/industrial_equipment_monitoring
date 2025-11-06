@@ -1,0 +1,120 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.13"
+name = "industrial_equipment_monitoring"
+readme = "README.md"
+dynamic = [ "version",]
+dependencies = [
+ "ipython>=9.6.0",
+ "jinja2>=3.1.6",
+ "jupyterlab>=4.4.10",
+ "kedro>=1.0.0",
+ "kedro-datasets>=8.1.0",
+ "matplotlib>=3.10.7",
+ "notebook>=7.4.7",
+ "numpy>=2.3.4",
+ "optuna>=4.5.0",
+ "pandas>=2.3.3",
+ "pillow>=12.0.0",
+ "pyarrow>=22.0.0",
+ "reportlab>=4.4.4",
+ "scikit-learn>=1.7.2",
+ "seaborn>=0.13.2",
+ "weasyprint>=66.0",
+ "xgboost>=3.1.1",
+]
+
+[project.scripts]
+industrial-equipment-monitoring = "industrial_equipment_monitoring.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.3"
+    ]
+
+[tool.kedro]
+package_name = "industrial_equipment_monitoring"
+project_name = "industrial_equipment_monitoring"
+kedro_init_version = "1.0.0"
+tools = "['Linting', 'Testing']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+
+[project.entry-points."kedro.hooks"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "--cov=src/industrial_equipment_monitoring",
+    "--cov-report=term-missing",
+    "-ra",
+    "--verbose",
+    "--strict-markers",
+    "--strict-config",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*", "*Test"]
+python_functions = ["test_*"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/industrial_equipment_monitoring"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/setup.py",
+    "*/conftest.py"
+]
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\b:"
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "Coverage Report - Industrial Equipment Monitoring"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [ "F", "W", "E", "I", "UP", "PL", "T201",]
+ignore = [ "E501",]
+
+[tool.setuptools.dynamic.version]
+attr = "industrial_equipment_monitoring.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "9ed0f1138123482eaea3c2445c998515"

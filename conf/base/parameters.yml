@@ -1,0 +1,48 @@
+model:
+  split:
+    test_size: 0.2
+    random_state: 42
+
+  featured_data:
+    target_column: faulty
+    features_to_drop: [location, equipment]
+
+  model_training:
+    study_name: industrial_equipment_monitoring
+    n_trials: 100
+    cv_folds: 5
+    cv_shuffle: True
+    early_stopping_rounds: 20
+    min_delta: 0.01 # 1 %
+    num_boost_round: 200
+    early_stopping_boost: 20
+    min_delta_boost: 0.01
+
+    xgb_params:
+      objective: binary:logistic
+      eval_metric: auc
+      tree_method: hist
+      device: cuda
+      max_depth: [3, 10]
+      learning_rate: [0.01, 0.3]
+      learning_rate_log: False
+      subsample: [0.6, 1]
+      colsample_bytree: [0.1, 1]
+      gamma: [0, 5]
+      min_child_weight: [1, 10]
+      reg_alpha: [1e-8, 1]
+      reg_alpha_log: False
+      reg_lambda: [1e-8, 1]
+      reg_lambda_log: False
+
+  reporting:
+    figsize: [10, 8]
+    cmap: "Blues"
+    target_class: 1
+    threshold_method: recall # f1, youden, precision_recall, recall
+    importance_type: gain # weight, gain, cover, total_gain, total_cover
+
+
+
+
+

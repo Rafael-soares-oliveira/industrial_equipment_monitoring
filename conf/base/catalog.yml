@@ -1,0 +1,61 @@
+raw_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/equipment_anomaly_data.csv
+
+cleaned_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/cleaned_data.parquet
+
+dataset_info:
+  type: pickle.PickleDataset
+  filepath: data/02_intermediate/dataset_info.pkl
+
+train_data:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/train_data.parquet
+
+test_data:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/test_data.parquet
+
+final_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/final_model.pkl
+
+best_params:
+  type: pickle.PickleDataset
+  filepath: data/07_model_output/best_params.pkl
+
+predictions:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/predictions.parquet
+
+report_data:
+  type: pickle.PickleDataset
+  filepath: data/07_model_output/report_data.pkl
+
+confusion_matrix_plot:
+  type: pillow.ImageDataset
+  filepath: data/07_reporting/graphs/confusion_matrix.png
+
+threshold_analysis_plot:
+  type: pillow.ImageDataset
+  filepath: data/07_reporting/graphs/threshold_analysis.png
+
+roc_curve_plot:
+  type: pillow.ImageDataset
+  filepath: data/07_reporting/graphs/roc_curve.png
+
+precision_recall_curve_plot:
+  type: pillow.ImageDataset
+  filepath: data/07_reporting/graphs/precision_recall_curve.png
+
+feature_importance_plot:
+  type: pillow.ImageDataset
+  filepath: data/07_reporting/graphs/feature_importance.png
+
+logo:
+  type: pillow.ImageDataset
+  filepath: data/08_reference/logo.png
+
+
