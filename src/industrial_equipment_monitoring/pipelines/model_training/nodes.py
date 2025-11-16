@@ -1,5 +1,6 @@
 import pandas as pd
 import xgboost as xgb
+from plotly.graph_objects import Figure
 
 from industrial_equipment_monitoring.pipelines.model_training.get_xgb_params import (
     get_xgb_params,
@@ -13,7 +14,7 @@ logger = setup_logger("ModelTraining")
 
 def train_final_model(
     train_data: pd.DataFrame, params: dict
-) -> tuple[xgb.Booster, dict[str, str | int | float]]:
+) -> dict[str, xgb.Booster | dict[str, str | int | float] | Figure]:
     """
     Train Model using XGBoost Native API
 
@@ -25,7 +26,7 @@ def train_final_model(
         ValueError: Raise error when DataFrame is empty.
 
     Returns:
-        tuple[xgb.Booster, dict[str, str | int | float]]: Returns trained model and best_params that are save in catalog.yml
+        tuple[xgb.Booster, dict[str, str | int | float], pd.DataFrame]: Returns trained model, best_params and optuna study dataframe
     """
     logger.info("Treinando modelo final com os melhores hiperparâmetros")
 
@@ -38,9 +39,11 @@ def train_final_model(
     X_train: pd.DataFrame = train_data.drop(columns=[xgb_params["target_col"]])
     y_train: pd.Series = train_data[xgb_params["target_col"]]
 
-    best_params: dict[str, str | int | float] = optimized_hyperparameters(
-        X_train, y_train, xgb_params
-    )
+    best_params: dict[str, str | int | float]
+    study_plots: dict[str, Figure]
+
+    best_params, study_plots = optimized_hyperparameters(X_train, y_train, xgb_params)
+
     best_params.update(
         {
             "objective": xgb_params["objective"],
@@ -65,4 +68,13 @@ def train_final_model(
     )
 
     logger.info("Modelo final treinado com sucesso")
-    return booster, best_params
+    return {
+        "model": booster,
+        "best_params": best_params,
+        "optimization_history": study_plots["optimization_history"],
+        "param_importance": study_plots["param_importance"],
+        "contour": study_plots["contour"],
+        "parallel_coordinate": study_plots["parallel_coordinate"],
+        "slice": study_plots["slice"],
+        "intermediate_values": study_plots["intermediate_values"],
+    }

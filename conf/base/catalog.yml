@@ -1,57 +1,162 @@
 raw_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/equipment_anomaly_data.csv
+  metadata:
+    kedro-viz:
+      layer: data_processing
 
 cleaned_data:
   type: pandas.ParquetDataset
   filepath: data/03_primary/cleaned_data.parquet
+  metadata:
+    kedro-viz:
+      layer: data_processing
 
 dataset_info:
   type: pickle.PickleDataset
   filepath: data/04_feature/dataset_info.pkl
+  metadata:
+    kedro-viz:
+      layer: data_processing
 
 train_data:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/train_data.parquet
+  metadata:
+    kedro-viz:
+      layer: data_processing
 
 test_data:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/test_data.parquet
+  metadata:
+    kedro-viz:
+      layer: data_processing
 
 final_model:
   type: pickle.PickleDataset
   filepath: data/06_models/final_model.pkl
+  metadata:
+    kedro-viz:
+      layer: training_model
 
 best_params:
   type: pickle.PickleDataset
   filepath: data/07_model_output/best_params.pkl
+  metadata:
+    kedro-viz:
+      layer: training_model
+
+optimization_history_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/optimization_history.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+param_importance_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/param_importance.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+contour_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/contour.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+parallel_coordinate_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/parallel_coordinate.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+slice_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/slice.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+intermediate_values_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/intermediate_values.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 predictions:
   type: pandas.ParquetDataset
   filepath: data/07_model_output/predictions.parquet
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 report_data:
   type: pickle.PickleDataset
   filepath: data/08_reporting/report_data.pkl
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 confusion_matrix_plot:
-  type: pillow.ImageDataset
-  filepath: data/08_reporting/graphs/confusion_matrix.png
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/confusion_matrix.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
-threshold_analysis_plot:
-  type: pillow.ImageDataset
-  filepath: data/08_reporting/graphs/threshold_analysis.png
+f1_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/f1_plot.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+  
+accuracy_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/accuracy_plot.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+precision_recall_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/precision_recall_plot.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+comparative_metrics_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/comparative_metrics_plot.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 roc_curve_plot:
-  type: pillow.ImageDataset
-  filepath: data/08_reporting/graphs/roc_curve.png
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/roc_curve.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
-precision_recall_curve_plot:
-  type: pillow.ImageDataset
-  filepath: data/08_reporting/graphs/precision_recall_curve.png
+average_precision_curve_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/average_precision_curve.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 feature_importance_plot:
-  type: pillow.ImageDataset
-  filepath: data/08_reporting/graphs/feature_importance.png
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/graphs/feature_importance.json
+  metadata:
+    kedro-viz:
+      layer: reporting
 
 

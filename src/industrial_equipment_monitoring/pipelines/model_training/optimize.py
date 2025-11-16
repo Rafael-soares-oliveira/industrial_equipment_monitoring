@@ -7,6 +7,15 @@ import pandas as pd
 import xgboost as xgb
 from optuna.exceptions import DuplicatedStudyError, OptunaError
 from optuna.trial import Trial
+from optuna.visualization import (
+    plot_contour,
+    plot_intermediate_values,
+    plot_optimization_history,
+    plot_parallel_coordinate,
+    plot_param_importances,
+    plot_slice,
+)
+from plotly.graph_objects import Figure
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 from xgboost.callback import EarlyStopping
@@ -174,7 +183,7 @@ def setup_optuna_study(study_name: str, direction: str) -> optuna.Study:
 
 def optimized_hyperparameters(
     X_train: pd.DataFrame, y_train: pd.Series, xgb_params: dict
-) -> dict[str, str | int | float]:
+) -> tuple[dict[str, str | int | float], dict[str, Figure]]:
     """
     Initiate study to optimize hyperparameters.
 
@@ -189,7 +198,9 @@ def optimized_hyperparameters(
         Exception: When an unexpected error occurs.
 
     Returns:
-        dict[str, str | int | float]: _description_
+        tuple[dict[str, str | int | float], dict[str, Figure]]:
+        - Best params
+        - Study plots
     """
     logger.info("Iniciando otimização de hiperparâmetros com Optuna")
     if X_train.empty:
@@ -266,4 +277,14 @@ def optimized_hyperparameters(
         logger.info(f"AUC range: {np.min(all_scores):.4f} - {np.max(all_scores):.4f}")
         logger.info(f"AUC médio: {np.mean(all_scores):.4f} ± {np.std(all_scores):.4f}")
 
-    return best_trial.params
+    # Export plots
+    plots = {
+        "optimization_history": plot_optimization_history(study),
+        "param_importance": plot_param_importances(study),
+        "contour": plot_contour(study),
+        "parallel_coordinate": plot_parallel_coordinate(study),
+        "slice": plot_slice(study),
+        "intermediate_values": plot_intermediate_values(study),
+    }
+
+    return best_trial.params, plots
