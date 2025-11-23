@@ -13,7 +13,8 @@ conf/**/*credentials*
 data/**
 
 # except their sub-folders
-!data/**/
+!data/01_raw/
+!data/01_raw/equipment_anomaly_data.csv
 
 # Except the raw data
 !data/equipment_anomaly_data.csv

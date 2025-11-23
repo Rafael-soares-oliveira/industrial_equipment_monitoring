@@ -5,7 +5,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import xgboost as xgb
-from optuna.exceptions import DuplicatedStudyError, OptunaError
+from optuna.exceptions import DuplicatedStudyError, OptunaError, TrialPruned
 from optuna.trial import Trial
 from optuna.visualization import (
     plot_contour,
@@ -15,6 +15,7 @@ from optuna.visualization import (
     plot_param_importances,
     plot_slice,
 )
+from optuna_integration import XGBoostPruningCallback
 from plotly.graph_objects import Figure
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
@@ -112,19 +113,30 @@ def create_objective(
                     save_best=True,
                 )
 
+                callbacks_list: list = [early_stopping]
+
+                if fold == 1:
+                    prunning_callback = XGBoostPruningCallback(
+                        trial, observation_key=f"validation-{xgb_params["eval_metric"]}"
+                    )
+                    callbacks_list.append(prunning_callback)
+
                 # Using Native XGBoost API with EarlyStopping
                 booster: Booster = xgb.train(
                     trial_params,
                     dtrain,
                     num_boost_round=xgb_params["num_boost_round"],
                     evals=[(dval, "validation")],
-                    callbacks=[early_stopping],
+                    callbacks=callbacks_list,
                     verbose_eval=False,
                 )
 
                 preds: np.ndarray = booster.predict(dval)
                 score: float = float(roc_auc_score(y_val, preds))
                 scores.append(score)
+
+            except TrialPruned:
+                raise
 
             except xgb.core.XGBoostError as e:
                 logger.error(
